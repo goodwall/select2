@@ -18,7 +18,26 @@ Apache License or the GPL License is distributed on an "AS IS" BASIS, WITHOUT WA
 CONDITIONS OF ANY KIND, either express or implied. See the Apache License and the GPL License for
 the specific language governing permissions and limitations under the Apache License and the GPL License.
 */
-(function ($) {
+(function (root, factory) {
+
+  if (typeof define === "function" && define.amd) {
+    // AMD (+ global for extensions)
+    define(["jquery", "hammerjs", "jquery.hammer"], function ($, Hammer) {
+      return (root.$ = factory($, Hammer));
+    });
+  } else if (typeof exports === "object") {
+    // CommonJS
+    var Hammer = require("hammerjs");
+    $ = require("jquery");
+    require("jquery.hammer");
+    module.exports = factory(require("jquery"), Hammer);
+  } else {
+    // Browser
+    root.$ = factory(root.$, root.Hammer);
+  }}(this, function ($, Hammer) {
+
+  "use strict";
+
     if(typeof $.fn.each2 == "undefined") {
         $.extend($.fn, {
             /*
@@ -35,15 +54,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 return this;
             }
         });
-    }
-})(jQuery);
-
-(function ($, undefined) {
-    "use strict";
-    /*global document, window, jQuery, console */
-
-    if (window.Select2 !== undefined) {
-        return;
     }
 
     var AbstractSelect2, SingleSelect2, MultiSelect2, nextUid, sizer,
@@ -1023,14 +1033,14 @@ the specific language governing permissions and limitations under the Apache Lic
 
             // data-select2-tags -> data-tags
             if (opts.element.data('tags') != null) {
-                var elemTags = opts.element.data('tags');
+                var tags = opts.element.data('tags');
 
                 // data-tags should actually be a boolean
-                if (!$.isArray(elemTags)) {
-                    elemTags = [];
+                if (!$.isArray(tags)) {
+                    tags = [];
                 }
 
-                opts.element.data('select2Tags', elemTags);
+                opts.element.data('select2Tags', tags);
             }
 
             // sortResults -> sorter
@@ -1561,7 +1571,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 mask.attr("id","select2-drop-mask").attr("class","select2-drop-mask");
                 mask.hide();
                 mask.appendTo(this.body);
-                mask.on("mousedown touchstart click", function (e) {
+                mask.hammer().bind("tap", this.bind(function(e) {
                     // Prevent IE from generating a click event on the body
                     reinsertElement(mask);
 
@@ -1575,7 +1585,7 @@ the specific language governing permissions and limitations under the Apache Lic
                         e.preventDefault();
                         e.stopPropagation();
                     }
-                });
+                }));
             }
 
             // ensure the mask is always right before the dropdown
@@ -2399,7 +2409,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
             }));
 
-            selection.on("mousedown touchstart", this.bind(function (e) {
+            selection.hammer().bind("tap", this.bind(function(e) {
                 // Prevent IE from generating a click event on the body
                 reinsertElement(selection);
 
@@ -2416,7 +2426,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 killEvent(e);
             }));
 
-            dropdown.on("mousedown touchstart", this.bind(function() {
+            dropdown.hammer().bind("tap", this.bind(function(e) {
                 if (this.opts.shouldFocusInput(this)) {
                     this.search.focus();
                 }
@@ -2745,7 +2755,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 if (data == undefined) data = null;
                 return data;
             } else {
-                if (this.opts.debug && console && console.warn) {
+                if (opts.debug && console && console.warn) {
                     console.warn(
                         'Select2: The `select2("data")` method can no longer set selected values in 4.0.0, ' +
                         'consider using the `.val()` method instead.'
@@ -3725,5 +3735,5 @@ the specific language governing permissions and limitations under the Apache Lic
             "multi": MultiSelect2
         }
     };
-
-}(jQuery));
+  return jQuery;
+}));
