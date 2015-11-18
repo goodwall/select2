@@ -1489,10 +1489,11 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.container.addClass("select2-drop-above");
                 $dropdown.addClass("select2-drop-above");
                 dropHeight = $dropdown.outerHeight(false);
-                css.top = offset.top - dropHeight;
+                css.top = (!this.opts.parentBodyElement)? offset.top - dropHeight : 0 - dropHeight;
                 css.bottom = 'auto';
             }
             else {
+                css.top = (!this.opts.parentBodyElement)? dropTop : 0;
                 css.top = dropTop;
                 css.bottom = 'auto';
                 this.container.removeClass("select2-drop-above");
